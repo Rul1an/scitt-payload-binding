@@ -100,10 +100,10 @@ Table of Contents
      6.1.  Leaf Construction . . . . . . . . . . . . . . . . . . . .  10
    7.  Typed Digest References . . . . . . . . . . . . . . . . . . .  11
      7.1.  Cross-Profile Comparability . . . . . . . . . . . . . . .  11
-     7.2.  Verification Scope  . . . . . . . . . . . . . . . . . . .  12
+     7.2.  Verification Scope  . . . . . . . . . . . . . . . . . . .  13
    8.  Profile Independence  . . . . . . . . . . . . . . . . . . . .  13
    9.  Discovery Mirror  . . . . . . . . . . . . . . . . . . . . . .  13
-   10. Extensibility and Cross-Cutting Facilities  . . . . . . . . .  13
+   10. Extensibility and Cross-Cutting Facilities  . . . . . . . . .  14
    11. Security Considerations . . . . . . . . . . . . . . . . . . .  14
      11.1.  Preimages Are Bytes, Not Renderings  . . . . . . . . . .  14
 
@@ -115,7 +115,7 @@ Internet-Draft          Canonical Payload Binding            August 2026
 
 
      11.2.  Low-Entropy Fields . . . . . . . . . . . . . . . . . . .  14
-     11.3.  Float Values and Digest Reproducibility  . . . . . . . .  14
+     11.3.  Float Values and Digest Reproducibility  . . . . . . . .  15
      11.4.  Immutable Coordinates  . . . . . . . . . . . . . . . . .  15
      11.5.  Tamper Evidence and Runtime Honesty  . . . . . . . . . .  15
      11.6.  Long-Term Verifiability Considerations . . . . . . . . .  15
@@ -352,6 +352,10 @@ Internet-Draft          Canonical Payload Binding            August 2026
    CANONICAL-DIGEST(jcs-n, P) =
        lowercase_hex(SHA-256(JCS(normalize(P minus exclusion_set))))
 
+   The exclusion set is matched against the top-level member names of P
+   only; a member of the same name nested inside a member's value is not
+   removed.
+
    This algorithm is Suite 1 of this profile.  The four codebases
    demonstrating byte agreement at IETF 126 all used jcs-n in shared,
    declared contexts; all are valid under jcs-n without modification.
@@ -383,16 +387,15 @@ Internet-Draft          Canonical Payload Binding            August 2026
    plus the name that referenced specification gives to the exact byte
    sequence in question.  Two examples of a valid selector:
 
-   *  RFC 7515 §5.1, JWS Signing Input -- the octets a JWS signature is
-      computed over.
-
-
 
 
 Mih & Sokolov            Expires 6 February 2027                [Page 7]
 
 Internet-Draft          Canonical Payload Binding            August 2026
 
+
+   *  RFC 7515 §5.1, JWS Signing Input -- the octets a JWS signature is
+      computed over.
 
    *  RFC 9052 §4.4, Sig_structure -- the octets a COSE_Sign1 signature
       is computed over.
@@ -436,11 +439,8 @@ Internet-Draft          Canonical Payload Binding            August 2026
    record).  The exclusion set is normative for the payload class; a
    verifier MUST apply the same exclusion set as the producer.
 
-   A producer MAY carry the derived identifier as a field in the
-   payload.  A verifier MUST recompute the identifier from the payload
-   bytes and the declared exclusion set.  If the recomputed value does
-   not match the carried value, the verifier MUST treat this as a defect
-   in the record.
+
+
 
 
 
@@ -449,6 +449,12 @@ Mih & Sokolov            Expires 6 February 2027                [Page 8]
 
 Internet-Draft          Canonical Payload Binding            August 2026
 
+
+   A producer MAY carry the derived identifier as a field in the
+   payload.  A verifier MUST recompute the identifier from the payload
+   bytes and the declared exclusion set.  If the recomputed value does
+   not match the carried value, the verifier MUST treat this as a defect
+   in the record.
 
    When selective disclosure is in use, the derived identifier MUST be
    computed over the SD-encoded form of the payload, not the plaintext
@@ -493,18 +499,17 @@ Internet-Draft          Canonical Payload Binding            August 2026
    Everything semantically specific to the payload class stays in the
    payload.
 
-   Protected-header claims are a closed set per payload class:
-   extensions are payload-only.  A Transparency Service that does not
-   understand a protected-header extension MUST be able to register the
-   Signed Statement and verify the envelope without it.
-
-
 
 
 Mih & Sokolov            Expires 6 February 2027                [Page 9]
 
 Internet-Draft          Canonical Payload Binding            August 2026
 
+
+   Protected-header claims are a closed set per payload class:
+   extensions are payload-only.  A Transparency Service that does not
+   understand a protected-header extension MUST be able to register the
+   Signed Statement and verify the envelope without it.
 
    The closed-claim principle does not prevent payload-class-specific
    protected-header fields from existing; it requires that such fields
@@ -548,11 +553,6 @@ Internet-Draft          Canonical Payload Binding            August 2026
 
    leaf_input = D.encode("utf-8")  -- WRONG: 64 ASCII bytes
 
-   A verifier constructing the leaf for proof verification MUST apply
-   the same rule.  Failure to distinguish the byte sequence from its hex
-   encoding produces a silently wrong leaf hash that fails inclusion
-   verification against any correct log.
-
 
 
 
@@ -561,6 +561,11 @@ Mih & Sokolov            Expires 6 February 2027               [Page 10]
 
 Internet-Draft          Canonical Payload Binding            August 2026
 
+
+   A verifier constructing the leaf for proof verification MUST apply
+   the same rule.  Failure to distinguish the byte sequence from its hex
+   encoding produces a silently wrong leaf hash that fails inclusion
+   verification against any correct log.
 
 7.  Typed Digest References
 
@@ -603,13 +608,8 @@ Internet-Draft          Canonical Payload Binding            August 2026
    same field set, the same canonicalization algorithm, the same domain
    separation, the same encoding, and the same representation.
 
-   A verifier that encounters a typed digest reference MUST establish
-   the digest context from the REFERENCED artifact-type definition and
-   the identifier carried by the reference.  The digest context is
-   resolved from the referenced artifact type's registry entry, keyed by
-   the type field; the digest_alg field names only the hash algorithm.
-   The canonicalization context of the cited artifact is resolved from
-   the artifact-type registry entry, not from the digest_alg field.
+
+
 
 
 
@@ -617,6 +617,14 @@ Mih & Sokolov            Expires 6 February 2027               [Page 11]
 
 Internet-Draft          Canonical Payload Binding            August 2026
 
+
+   A verifier that encounters a typed digest reference MUST establish
+   the digest context from the REFERENCED artifact-type definition and
+   the identifier carried by the reference.  The digest context is
+   resolved from the referenced artifact type's registry entry, keyed by
+   the type field; the digest_alg field names only the hash algorithm.
+   The canonicalization context of the cited artifact is resolved from
+   the artifact-type registry entry, not from the digest_alg field.
 
    digest_alg is REQUIRED even though every algorithm registered in
    Section 13.1 today names the same hash, SHA-256: it is the field that
@@ -652,6 +660,20 @@ Internet-Draft          Canonical Payload Binding            August 2026
    Equal-looking hex values computed under incompatible digest contexts
    are coincidental, not equivalent.
 
+
+
+
+
+
+
+
+
+
+Mih & Sokolov            Expires 6 February 2027               [Page 12]
+
+Internet-Draft          Canonical Payload Binding            August 2026
+
+
 7.2.  Verification Scope
 
    Successful verification of a typed digest reference establishes
@@ -663,16 +685,6 @@ Internet-Draft          Canonical Payload Binding            August 2026
    artifact type or consuming application profile remains a separate
    verification step.  Missing, indeterminate, or failed required
    appraisal MUST NOT be treated as authorization success.
-
-
-
-
-
-
-Mih & Sokolov            Expires 6 February 2027               [Page 12]
-
-Internet-Draft          Canonical Payload Binding            August 2026
-
 
    The interchangeability property of typed digest references -- that
    any registered artifact type may fill a citation slot -- applies to
@@ -710,6 +722,14 @@ Internet-Draft          Canonical Payload Binding            August 2026
    mismatch between the advisory mirror value and the recomputed value
    is a defect in the record and MUST be reported.
 
+
+
+
+Mih & Sokolov            Expires 6 February 2027               [Page 13]
+
+Internet-Draft          Canonical Payload Binding            August 2026
+
+
    The discovery mirror parameter is aligned with the trace-metadata
    convention in draft-birkholz-verifiable-agent-conversations §7.4
    [I-D.birkholz-verifiable-agent-conversations], which defines a
@@ -720,15 +740,6 @@ Internet-Draft          Canonical Payload Binding            August 2026
 10.  Extensibility and Cross-Cutting Facilities
 
    This section is informative.
-
-
-
-
-
-Mih & Sokolov            Expires 6 February 2027               [Page 13]
-
-Internet-Draft          Canonical Payload Binding            August 2026
-
 
    Several concerns are common to all payload profiles and, if defined
    independently per profile, would undermine decomposable verification
@@ -767,6 +778,14 @@ Internet-Draft          Canonical Payload Binding            August 2026
    digests.  A payload class SHOULD commit low-entropy fields under a
    per-issuer salt or via a selective-disclosure mechanism (see the SD-
    JWT commitment pattern in [RFC9901]) rather than digesting the bare
+
+
+
+Mih & Sokolov            Expires 6 February 2027               [Page 14]
+
+Internet-Draft          Canonical Payload Binding            August 2026
+
+
    value.  Bare digests of low-entropy fields are not confidential.
 
 11.3.  Float Values and Digest Reproducibility
@@ -778,14 +797,6 @@ Internet-Draft          Canonical Payload Binding            August 2026
    these forms.  A float in a digest-bearing field silently produces
    implementation-dependent digests that cannot be reproduced and
    therefore cannot be verified.  Exact decimal strings are the only
-
-
-
-Mih & Sokolov            Expires 6 February 2027               [Page 14]
-
-Internet-Draft          Canonical Payload Binding            August 2026
-
-
    portable encoding for monetary and quantity values.
 
 11.4.  Immutable Coordinates
@@ -823,17 +834,6 @@ Internet-Draft          Canonical Payload Binding            August 2026
    original is considered weak; this cannot be done retroactively.
    Deployments with long retention requirements SHOULD adopt an
    evidence-renewal scheme.  [RFC4998] specifies one such scheme and
-   distinguishes timestamp renewal, which operates on archived evidence
-   alone, from hash-tree renewal, which requires access to the original
-   data objects.  This specification does not mandate a particular
-   scheme.
-
-
-
-
-
-
-
 
 
 
@@ -841,6 +841,11 @@ Mih & Sokolov            Expires 6 February 2027               [Page 15]
 
 Internet-Draft          Canonical Payload Binding            August 2026
 
+
+   distinguishes timestamp renewal, which operates on archived evidence
+   alone, from hash-tree renewal, which requires access to the original
+   data objects.  This specification does not mandate a particular
+   scheme.
 
 12.  Privacy Considerations
 
@@ -885,11 +890,6 @@ Internet-Draft          Canonical Payload Binding            August 2026
 
    This registry records the canonicalization algorithms that may be
    used to compute CANONICAL-DIGEST values.
-
-
-
-
-
 
 
 
